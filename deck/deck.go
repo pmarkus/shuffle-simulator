@@ -8,49 +8,37 @@ import (
 )
 
 type Deck struct {
-	cards []card
-}
-
-type card struct {
-	name string
+	cards []int
 }
 
 func NewSimpleDeck(size int) *Deck {
-	cards := make([]card, 0)
+	cards := make([]int, size)
 	for i := 0; i < size; i++ {
-		c := card{
-			name: strconv.Itoa(i),
-		}
-		cards = append(cards, c)
+		cards[i] = i
 	}
-
 	deck := Deck{
 		cards: cards,
 	}
 	return &deck
 }
 
-func (d *Deck) GetCard(i int) (string, error) {
+func (d *Deck) GetCard(i int) (int, error) {
 	if i < 0 || i >= len(d.cards) {
-		return "", errors.New("index out of bounds")
+		return -1, errors.New("index out of bounds")
 	}
-	return d.cards[i].name, nil
+	return d.cards[i], nil
 }
 
-func (d *Deck) GetCards() []string {
-	s := make([]string, 0, len(d.cards))
-	for _, card := range d.cards {
-		s = append(s, card.name)
-	}
-	return s
+func (d *Deck) GetCards() []int {
+	return d.cards
 }
 
 func (d *Deck) Cut() (*Deck, *Deck) {
 	dTop := Deck{
-		cards: make([]card, 0),
+		cards: make([]int, 0),
 	}
 	dBot := Deck{
-		cards: make([]card, 0),
+		cards: make([]int, 0),
 	}
 	var half int = len(d.cards) / 2
 	for i := 0; i < half; i++ {
@@ -59,18 +47,18 @@ func (d *Deck) Cut() (*Deck, *Deck) {
 	for i := half; i < len(d.cards); i++ {
 		dBot.cards = append(dBot.cards, d.cards[i])
 	}
-	d.cards = make([]card, 0)
+	d.cards = make([]int, 0)
 	return &dTop, &dBot
 }
 
 func Stack(dTop *Deck, dBot *Deck) *Deck {
 	d := Deck{
-		cards: make([]card, 0),
+		cards: make([]int, 0),
 	}
 	d.cards = append(d.cards, dTop.cards...)
 	d.cards = append(d.cards, dBot.cards...)
-	dTop.cards = make([]card, 0)
-	dBot.cards = make([]card, 0)
+	dTop.cards = make([]int, 0)
+	dBot.cards = make([]int, 0)
 
 	return &d
 }
@@ -83,7 +71,7 @@ func (d *Deck) RiffleShuffle() {
 	p1, p2 := d.Cut()
 	p1Size := len(p1.cards)
 	p2Size := len(p2.cards)
-	d.cards = make([]card, 0, dSize)
+	d.cards = make([]int, 0, dSize)
 
 	for len(d.cards) < dSize {
 		var probP1 float64 = float64(p1Size) / (float64(p1Size) + float64(p2Size))
@@ -95,17 +83,26 @@ func (d *Deck) RiffleShuffle() {
 			p2Size--
 		}
 	}
-	p1.cards = make([]card, 0)
-	p2.cards = make([]card, 0)
+	p1.cards = make([]int, 0)
+	p2.cards = make([]int, 0)
+}
+
+func (d *Deck) PositionOfCard(card int) (int, error) {
+	for i, c := range d.cards {
+		if c == card {
+			return i, nil
+		}
+	}
+	return -1, errors.New("card not found")
 }
 
 func (d *Deck) String() string {
 	s := ""
 	for i, card := range d.cards {
 		if i != 0 {
-			s = s + "\t" + card.name
+			s = s + "\t" + strconv.Itoa(card)
 		} else {
-			s = s + card.name
+			s = s + strconv.Itoa(card)
 		}
 	}
 	return s

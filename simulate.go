@@ -24,7 +24,7 @@ func main() {
 func simulate() {
 	deckSize := 99
 	shuffleIterations := 10
-	simulationIterations := 1000
+	simulationIterations := 10000
 
 	fmt.Printf("Deck Size:\t\t%d\n", deckSize)
 	fmt.Printf("Shuffle iterations:\t%d\n", shuffleIterations)
@@ -42,7 +42,8 @@ func simulate() {
 		tp.FinishIteration(*d)
 	}
 
-	fmt.Println("Position change test: ", test.PositionChangeTest(tp))
+	fmt.Printf("Position change test: %s\n\n", test.PositionChangeTest(tp))
+	fmt.Printf("Position occurence test: \n%s\n", test.PositionOccurenceTest(tp))
 }
 
 func demo() {

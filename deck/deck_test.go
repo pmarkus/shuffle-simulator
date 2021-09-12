@@ -14,10 +14,10 @@ func TestCuttingDeckLeavesOldDeckEmpty(t *testing.T) {
 
 func TestCuttingDeckWithOddAmountOfCardsLeaveMoreCardsInBottom(t *testing.T) {
 	d := Deck{
-		cards: make([]card, 0),
+		cards: make([]int, 0),
 	}
 	for i := 0; i < 9; i++ {
-		d.cards = append(d.cards, card{name: ""})
+		d.cards = append(d.cards, i)
 	}
 	dTop, dBot := d.Cut()
 	assert.True(t, len(dTop.cards) < len(dBot.cards))
@@ -25,33 +25,33 @@ func TestCuttingDeckWithOddAmountOfCardsLeaveMoreCardsInBottom(t *testing.T) {
 
 func TestCuttingDeckWithEvenAmountOfCardsLeaveEqualAmountOfCardsInEachDeck(t *testing.T) {
 	d := Deck{
-		cards: make([]card, 0),
+		cards: make([]int, 0),
 	}
 	for i := 0; i < 8; i++ {
-		d.cards = append(d.cards, card{name: ""})
+		d.cards = append(d.cards, i)
 	}
 	dTop, dBot := d.Cut()
 	assert.Equal(t, len(dTop.cards), len(dBot.cards))
 }
 
 func TestMergingDecksPutFirstDeckOnTop(t *testing.T) {
-	d1Cards := []card{
-		{name: "a"},
-		{name: "b"},
+	d1Cards := []int{
+		6,
+		5,
 	}
 	d1 := Deck{
 		cards: d1Cards,
 	}
-	d2Cards := []card{
-		{name: "c"},
-		{name: "d"},
+	d2Cards := []int{
+		4,
+		3,
 	}
 	d2 := Deck{
 		cards: d2Cards,
 	}
 	d := Stack(&d1, &d2)
-	assert.Equal(t, d.cards[0].name, "a")
-	assert.Equal(t, d.cards[1].name, "b")
-	assert.Equal(t, d.cards[2].name, "c")
-	assert.Equal(t, d.cards[3].name, "d")
+	assert.Equal(t, d.cards[0], 6)
+	assert.Equal(t, d.cards[1], 5)
+	assert.Equal(t, d.cards[2], 4)
+	assert.Equal(t, d.cards[3], 3)
 }
