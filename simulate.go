@@ -1,89 +1,48 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 
 	"github.com/pmarkus/shuffler/deck"
 	"github.com/pmarkus/shuffler/shuffle"
+	"github.com/pmarkus/shuffler/test"
 )
 
 func main() {
 	runDemo := flag.Bool("demo", false, "Run a small display of functionality.")
-	quiet := flag.Bool("quiet", true, "only print simulation result")
 	flag.Parse()
 
 	if *runDemo {
 		fmt.Println("Demo of a deck and its interactions")
 		demo()
 	} else {
-		if !*quiet {
-			fmt.Println("Running two-pile rotation-shuffle simulation")
-		}
-		simulate(*quiet)
+		simulate()
 	}
 }
 
-func simulate(quiet bool) {
-	deckSize := 16
+func simulate() {
+	deckSize := 99
 	shuffleIterations := 10
-	simulationRuns := 1000
+	simulationIterations := 1000
 
-	if !quiet {
-		fmt.Printf("Deck Size:\t\t" + fmt.Sprint(deckSize) + "\n")
-		fmt.Printf("Shuffle iterations:\t" + fmt.Sprint(shuffleIterations) + "\n")
-		fmt.Printf("Simulation runs:\t" + fmt.Sprint(simulationRuns) + "\n")
-	}
+	fmt.Printf("Deck Size:\t\t%d\n", deckSize)
+	fmt.Printf("Shuffle iterations:\t%d\n", shuffleIterations)
+	fmt.Printf("Simulation iterations:\t%d\n", simulationIterations)
+	fmt.Println("")
 
-	posTestResults := make([][]int, 0)
+	tp := test.NewTestProcessor()
 
-	for i := 0; i < simulationRuns; i++ {
+	for i := 0; i < simulationIterations; i++ {
 
 		d := deck.NewSimpleDeck(deckSize)
-		originalOrder := d.GetCards()
-		for i := 0; i < shuffleIterations; i++ {
-			d = shuffle.TwoPileRotationShuffle(d, shuffleIterations)
-		}
+		tp.StartIteration(*d)
 
-		posTestResults = append(posTestResults, runPositionTest(originalOrder, d.GetCards()))
+		d = shuffle.TwoPileRotationShuffle(d, shuffleIterations)
+		tp.FinishIteration(*d)
 	}
 
-	averagedPosResults := make([]float64, deckSize)
-	averagedPosResultsString := ""
-	for i, avg := range averagedPosResults {
-		for _, results := range posTestResults {
-			avg += float64(results[i])
-		}
-		avg /= float64(len(posTestResults))
-		averagedPosResultsString += fmt.Sprint(avg) + " "
-	}
-
-	if !quiet {
-		fmt.Println("Simulation results:")
-	}
-	fmt.Printf("test:\t%s\n", averagedPosResultsString)
-}
-
-func runPositionTest(before, after []string) []int {
-	r := make([]int, 0)
-	for iBefore, bName := range before {
-		iAfter, err := findPosOfCard(after, bName)
-		if err != nil {
-			panic("a card have been lost in the process")
-		}
-		r = append(r, iBefore-iAfter)
-	}
-	return r
-}
-
-func findPosOfCard(s []string, name string) (int, error) {
-	for i, sName := range s {
-		if sName == name {
-			return i, nil
-		}
-	}
-	return -1, errors.New("card not found")
+	fmt.Println("Position change test: ", test.PositionChangeTest(tp))
 }
 
 func demo() {
