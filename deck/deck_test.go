@@ -6,31 +6,31 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSplittingDeckLeavesOldDeckEmpty(t *testing.T) {
-	d := NewSimpleDeck()
-	d.Split()
+func TestCuttingDeckLeavesOldDeckEmpty(t *testing.T) {
+	d := NewSimpleDeck(8)
+	d.Cut()
 	assert.Equal(t, 0, len(d.cards))
 }
 
-func TestSplittingDeckWithOddAmountOfCardsLeaveMoreCardsInBottom(t *testing.T) {
+func TestCuttingDeckWithOddAmountOfCardsLeaveMoreCardsInBottom(t *testing.T) {
 	d := Deck{
 		cards: make([]card, 0),
 	}
 	for i := 0; i < 9; i++ {
 		d.cards = append(d.cards, card{name: ""})
 	}
-	dTop, dBot := d.Split()
+	dTop, dBot := d.Cut()
 	assert.True(t, len(dTop.cards) < len(dBot.cards))
 }
 
-func TestSplittingDeckWithEvenAmountOfCardsLeaveEqualAmountOfCardsInEachDeck(t *testing.T) {
+func TestCuttingDeckWithEvenAmountOfCardsLeaveEqualAmountOfCardsInEachDeck(t *testing.T) {
 	d := Deck{
 		cards: make([]card, 0),
 	}
 	for i := 0; i < 8; i++ {
 		d.cards = append(d.cards, card{name: ""})
 	}
-	dTop, dBot := d.Split()
+	dTop, dBot := d.Cut()
 	assert.Equal(t, len(dTop.cards), len(dBot.cards))
 }
 
@@ -49,7 +49,7 @@ func TestMergingDecksPutFirstDeckOnTop(t *testing.T) {
 	d2 := Deck{
 		cards: d2Cards,
 	}
-	d := Merge(&d1, &d2)
+	d := Stack(&d1, &d2)
 	assert.Equal(t, d.cards[0].name, "a")
 	assert.Equal(t, d.cards[1].name, "b")
 	assert.Equal(t, d.cards[2].name, "c")
