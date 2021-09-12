@@ -1,7 +1,6 @@
 package test
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/pmarkus/shuffler/deck"
@@ -33,13 +32,4 @@ func iterationPosChanges(before, after deck.Deck) []int {
 		r = append(r, iBefore-iAfter)
 	}
 	return r
-}
-
-func findPosOfCard(cards []int, card int) (int, error) {
-	for i, cName := range cards {
-		if cName == card {
-			return i, nil
-		}
-	}
-	return -1, errors.New("card not found")
 }

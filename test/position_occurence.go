@@ -4,9 +4,9 @@ import "fmt"
 
 func PositionOccurenceTest(tp *TestProcessor) string {
 	occurenceTracker := make([][]float64, len(tp.iterations[0].startDeck.GetCards()))
-	for i, _ := range occurenceTracker {
+	for i := range occurenceTracker {
 		occurenceTracker[i] = positionOccurenceOfCard(i, tp.iterations)
-		for j, _ := range occurenceTracker {
+		for j := range occurenceTracker {
 			occurenceTracker[i][j] /= float64(len(tp.iterations))
 		}
 	}
