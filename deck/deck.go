@@ -2,16 +2,22 @@ package deck
 
 import (
 	"errors"
+	"math"
 	"math/rand"
 	"strconv"
 	"time"
+)
+
+var (
+	rndSeed = rand.NewSource(time.Now().UnixNano())
+	rnd     = rand.New(rndSeed)
 )
 
 type Deck struct {
 	cards []int
 }
 
-func NewSimpleDeck(size int) *Deck {
+func NewDeck(size int) *Deck {
 	cards := make([]int, size)
 	for i := 0; i < size; i++ {
 		cards[i] = i
@@ -20,6 +26,29 @@ func NewSimpleDeck(size int) *Deck {
 		cards: cards,
 	}
 	return &deck
+}
+
+func NewRandomDeck(size int) *Deck {
+	cards := make([]int, size)
+	seq := make([]int, size)
+	for i := range seq {
+		seq[i] = i
+	}
+
+	for i := 0; i < size; i++ {
+		index := rnd.Intn(len(seq))
+		cards[i] = seq[index]
+		seq = remove(seq, index)
+	}
+	deck := Deck{
+		cards: cards,
+	}
+	return &deck
+}
+
+func remove(s []int, i int) []int {
+	s[i] = s[len(s)-1]
+	return s[:len(s)-1]
 }
 
 func (d *Deck) GetCard(i int) (int, error) {
@@ -40,15 +69,37 @@ func (d *Deck) Cut() (*Deck, *Deck) {
 	dBot := Deck{
 		cards: make([]int, 0),
 	}
-	var half int = len(d.cards) / 2
-	for i := 0; i < half; i++ {
+
+	cutIndex := getCutPointIndexByNormalDistribution(len(d.cards))
+	for i := 0; i < cutIndex; i++ {
 		dTop.cards = append(dTop.cards, d.cards[i])
 	}
-	for i := half; i < len(d.cards); i++ {
+	for i := cutIndex; i < len(d.cards); i++ {
 		dBot.cards = append(dBot.cards, d.cards[i])
 	}
 	d.cards = make([]int, 0)
 	return &dTop, &dBot
+}
+
+// Calculates a random index close to the half of the deck according to a normal distribution.
+// This simulates a human's atempt at cutting a deck in half.
+// The returned index will always be in the range (0, deckSize-1].
+func getCutPointIndexByNormalDistribution(deckSize int) int {
+	standardDev := float64(deckSize) / 20
+	// The half-point compensation is to compensate for us working with a set of numbers (indices).
+	// Like how the average value of a six-sided dice [1,2,3,4,5,6] isn't 3, but 3.5.
+	const halfPointCompensation = 0.5
+
+	index := int(math.Round(rnd.NormFloat64()*standardDev + float64(deckSize-1)/2 + halfPointCompensation))
+	// Do not allow the cut index to be the first element. I.e. cut index must be at least index 1.
+	if index < 1 {
+		index = 1
+	}
+	if index > deckSize-1 {
+		index = deckSize - 1
+	}
+
+	return index
 }
 
 func Stack(dTop *Deck, dBot *Deck) *Deck {
@@ -64,9 +115,6 @@ func Stack(dTop *Deck, dBot *Deck) *Deck {
 }
 
 func (d *Deck) RiffleShuffle() {
-	s := rand.NewSource(time.Now().UnixNano())
-	r := rand.New(s)
-
 	dSize := len(d.cards)
 	p1, p2 := d.Cut()
 	p1Size := len(p1.cards)
@@ -75,7 +123,7 @@ func (d *Deck) RiffleShuffle() {
 
 	for len(d.cards) < dSize {
 		var probP1 float64 = float64(p1Size) / (float64(p1Size) + float64(p2Size))
-		if r.Float64() < probP1 {
+		if rnd.Float64() < probP1 {
 			d.cards = append(d.cards, p1.cards[len(p1.cards)-p1Size])
 			p1Size--
 		} else {

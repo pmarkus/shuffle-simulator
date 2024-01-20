@@ -7,7 +7,7 @@ import (
 )
 
 func TestCuttingDeckLeavesOldDeckEmpty(t *testing.T) {
-	d := NewSimpleDeck(8)
+	d := NewDeck(8)
 	d.Cut()
 	assert.Equal(t, 0, len(d.cards))
 }

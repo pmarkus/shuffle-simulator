@@ -27,7 +27,7 @@ func iterationPosChanges(before, after deck.Deck) []int {
 	for iBefore, card := range before.GetCards() {
 		iAfter, err := after.PositionOfCard(card)
 		if err != nil {
-			panic("a card have been lost in the process")
+			panic("a card has been lost in the process")
 		}
 		r = append(r, iBefore-iAfter)
 	}
